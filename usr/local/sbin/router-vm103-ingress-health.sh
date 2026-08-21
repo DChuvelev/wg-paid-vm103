@@ -34,6 +34,10 @@ access_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o 
 access_health_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/health")"; [ "$access_health_code" = 200 ]; grep -Fqx 'access-ok' "$TMP"
 printf '' | openssl s_client -connect 127.0.0.1:443 -servername "$ACCESS_HOST" 2>/dev/null | openssl x509 -outform PEM > "$CERT"
 openssl x509 -in "$CERT" -noout -checkhost "$ACCESS_HOST" >/dev/null
+access_login_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/login")"; [ "$access_login_code" = 200 ]; grep -Fq 'Secret Studio Access' "$TMP"; grep -Fq '/v2/auth/login/request' "$TMP"
+access_magic_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/auth/magic#token=never-sent")"; [ "$access_magic_code" = 200 ]; grep -Fq 'location.hash' "$TMP"; grep -Fq 'history.replaceState' "$TMP"; grep -Fq '/v2/auth/magic-link/consume' "$TMP"
+closed_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' -H 'Content-Type: application/json' --data '{"email":"closed-gate@example.invalid"}' "https://$ACCESS_HOST/v2/auth/login/request")"; [ "$closed_code" = 404 ]; grep -Fq '"detail":"not found"' "$TMP"
+admin_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/admin/invites")"; [ "$admin_code" = 404 ]; grep -Fqx 'not found' "$TMP"
 echo 'VM103_CADDY_ACTIVE=true'
 echo 'VM103_REPORTS_PRIMARY=PASS'
 echo 'VM103_REPORTS001_HTTP_REDIRECT=PASS'
@@ -44,7 +48,11 @@ echo 'VM103_ACCESS_HTTP_REDIRECT=PASS'
 echo 'VM103_ACCESS_HTTPS_204=PASS'
 echo 'VM103_ACCESS_HEALTH_ROUTE=PASS'
 echo 'VM103_ACCESS_TLS_CERTIFICATE_HOSTNAME=PASS'
-echo 'VM103_ACCESS_VM121_PROXY_ACTIVE=false'
+echo 'VM103_ACCESS_LOGIN_PAGE=PASS'
+echo 'VM103_ACCESS_MAGIC_FRAGMENT_PAGE=PASS'
+echo 'VM103_ACCESS_PUBLIC_API_PROXY_ACTIVE=true'
+echo 'VM103_ACCESS_EXTERNAL_ONBOARDING_GATE_CLOSED=PASS'
+echo 'VM103_ACCESS_ADMIN_PROXY_ACTIVE=false'
 
 WEB_META_ROOT='/srv/wg-paid/web-meta'
 OLD_SEED='/old/20260821-133634_step050m07p26c4f_r04_public_reports_cutover_vm101_dnat_to_vm103_and_tls_retry/'

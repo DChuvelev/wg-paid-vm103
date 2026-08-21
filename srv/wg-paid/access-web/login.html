@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Secret Studio Access</title></head>
+<body><main><h1>Secret Studio Access</h1><p>Enter your email to request a one-time sign-in link.</p><form id="login"><label>Email <input id="email" type="email" autocomplete="email" required></label><button type="submit">Send sign-in link</button></form><p id="status" role="status"></p></main>
+<script>
+const form=document.getElementById('login');const statusEl=document.getElementById('status');
+form.addEventListener('submit',async(e)=>{e.preventDefault();statusEl.textContent='Sending…';const email=document.getElementById('email').value;try{const r=await fetch('/v2/auth/login/request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(r.status===202){statusEl.textContent='If this address is eligible, a sign-in link will be sent.';}else if(r.status===404){statusEl.textContent='Sign-in is not active yet.';}else if(r.status===429){statusEl.textContent='Please try again later.';}else{statusEl.textContent='Unable to request a sign-in link.';}}catch(_){statusEl.textContent='Unable to request a sign-in link.';}});
+</script></body></html>

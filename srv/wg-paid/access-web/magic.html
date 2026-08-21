@@ -1,0 +1,6 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Secret Studio Access — Sign in</title></head>
+<body><main><h1>Secret Studio Access</h1><p id="status" role="status">Checking sign-in link…</p></main>
+<script>
+(async()=>{const statusEl=document.getElementById('status');const raw=location.hash.startsWith('#')?location.hash.slice(1):'';const token=new URLSearchParams(raw).get('token')||'';history.replaceState(null,'',location.pathname);if(!token){statusEl.textContent='This sign-in link is invalid.';return;}try{const r=await fetch('/v2/auth/magic-link/consume',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});if(r.status===200){statusEl.textContent='Signed in successfully.';}else if(r.status===404){statusEl.textContent='Sign-in is not active yet.';}else{statusEl.textContent='This sign-in link is invalid or expired.';}}catch(_){statusEl.textContent='Unable to complete sign-in.';}})();
+</script></body></html>

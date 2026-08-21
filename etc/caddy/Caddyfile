@@ -111,11 +111,45 @@ https://reports001.secret-studio.ru {
 }
 
 https://access.secret-studio.ru {
+    header {
+        Cache-Control "no-store, max-age=0"
+        Pragma "no-cache"
+        Referrer-Policy "no-referrer"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    }
+
     @health path /health
     handle @health {
         respond "access-ok" 200
     }
-    handle {
+
+    @root path /
+    handle @root {
         respond 204
+    }
+
+    @login path /login /login/
+    handle @login {
+        root * /srv/wg-paid/access-web
+        rewrite * /login.html
+        file_server
+    }
+
+    @magic path /auth/magic /auth/magic/
+    handle @magic {
+        root * /srv/wg-paid/access-web
+        rewrite * /magic.html
+        file_server
+    }
+
+    @public_api path /v2/auth/login/request /v2/auth/magic-link/consume /v2/auth/invites/redeem /v2/auth/logout /v2/account/me /v2/account/profiles /v2/account/profiles/*
+    handle @public_api {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    handle {
+        respond "not found" 404
     }
 }
