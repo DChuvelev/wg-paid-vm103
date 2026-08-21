@@ -29,13 +29,85 @@
 }
 
 https://reports.secret-studio.ru {
-    root * /srv/wg-paid/reports
-    file_server
+    log {
+        output stderr
+        format json
+    }
+
+    @crawl_root path /
+    handle @crawl_root {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        header X-Robots-Tag "index, follow"
+        root * /srv/wg-paid/web-meta
+        rewrite * /index.html
+        file_server
+    }
+
+    @robots path /robots.txt
+    handle @robots {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        root * /srv/wg-paid/web-meta
+        file_server
+    }
+
+    @sitemap path /sitemap.xml
+    handle @sitemap {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        root * /srv/wg-paid/web-meta
+        rewrite * /sitemap-reports.xml
+        file_server
+    }
+
+    handle {
+        @latest path /latest /latest/*
+        header @latest Cache-Control "no-cache, max-age=0, must-revalidate"
+        @old path /old /old/*
+        header @old Cache-Control "public, max-age=31536000, immutable"
+        header X-Robots-Tag "index, follow"
+        root * /srv/wg-paid/reports
+        file_server
+    }
 }
 
 https://reports001.secret-studio.ru {
-    root * /srv/wg-paid/reports
-    file_server
+    log {
+        output stderr
+        format json
+    }
+
+    @crawl_root path /
+    handle @crawl_root {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        header X-Robots-Tag "index, follow"
+        root * /srv/wg-paid/web-meta
+        rewrite * /index.html
+        file_server
+    }
+
+    @robots path /robots.txt
+    handle @robots {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        root * /srv/wg-paid/web-meta
+        file_server
+    }
+
+    @sitemap path /sitemap.xml
+    handle @sitemap {
+        header Cache-Control "no-cache, max-age=0, must-revalidate"
+        root * /srv/wg-paid/web-meta
+        rewrite * /sitemap-reports001.xml
+        file_server
+    }
+
+    handle {
+        @latest path /latest /latest/*
+        header @latest Cache-Control "no-cache, max-age=0, must-revalidate"
+        @old path /old /old/*
+        header @old Cache-Control "public, max-age=31536000, immutable"
+        header X-Robots-Tag "index, follow"
+        root * /srv/wg-paid/reports
+        file_server
+    }
 }
 
 https://access.secret-studio.ru {

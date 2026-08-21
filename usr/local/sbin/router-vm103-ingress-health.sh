@@ -45,4 +45,35 @@ echo 'VM103_ACCESS_HTTPS_204=PASS'
 echo 'VM103_ACCESS_HEALTH_ROUTE=PASS'
 echo 'VM103_ACCESS_TLS_CERTIFICATE_HOSTNAME=PASS'
 echo 'VM103_ACCESS_VM121_PROXY_ACTIVE=false'
+
+WEB_META_ROOT='/srv/wg-paid/web-meta'
+OLD_SEED='/old/20260821-133634_step050m07p26c4f_r04_public_reports_cutover_vm101_dnat_to_vm103_and_tls_retry/'
+[ -f "$WEB_META_ROOT/index.html" ]
+[ -f "$WEB_META_ROOT/robots.txt" ]
+[ -f "$WEB_META_ROOT/sitemap-reports.xml" ]
+[ -f "$WEB_META_ROOT/sitemap-reports001.xml" ]
+for H in "$REPORTS_HOST" "$REPORTS001_HOST"; do
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/" -o "$TMP"
+  grep -Fq 'Secret Studio Reports' "$TMP"
+  grep -Fq 'href="/latest/"' "$TMP"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/robots.txt" -o "$TMP"
+  grep -Fqx 'User-agent: OAI-SearchBot' "$TMP"
+  grep -Fqx 'Allow: /' "$TMP"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/sitemap.xml" -o "$TMP"
+  grep -Fq "https://$H/latest/" "$TMP"
+  grep -Fq "https://$H$OLD_SEED" "$TMP"
+  HDR="$(mktemp /tmp/vm103-crawl-hdr.XXXXXX)"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H/latest/"
+  tr -d '' < "$HDR" | grep -Fix 'Cache-Control: no-cache, max-age=0, must-revalidate' >/dev/null
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H$OLD_SEED"
+  tr -d '' < "$HDR" | grep -Fix 'Cache-Control: public, max-age=31536000, immutable' >/dev/null
+  rm -f "$HDR"
+done
+echo 'VM103_REPORTS_CRAWL_ROOT=PASS'
+echo 'VM103_REPORTS_ROBOTS=PASS'
+echo 'VM103_REPORTS_SITEMAP=PASS'
+echo 'VM103_REPORTS_LATEST_CACHE_POLICY=PASS'
+echo 'VM103_REPORTS_OLD_CACHE_POLICY=PASS'
+echo 'VM103_REPORTS_ACCESS_LOGGING_CONFIGURED=true'
+
 echo 'RESULT=PASS_VM103_ACCESS_AND_REPORTS001_INGRESS_HEALTH'

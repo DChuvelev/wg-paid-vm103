@@ -1,0 +1,8 @@
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://reports.secret-studio.ru/sitemap.xml
+Sitemap: https://reports001.secret-studio.ru/sitemap.xml
