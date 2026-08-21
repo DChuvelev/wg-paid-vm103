@@ -1,0 +1,19 @@
+{
+    auto_https off
+    admin off
+}
+
+:80 {
+    @music_health {
+        host musicserver.internal.invalid
+        path /health /health/db
+    }
+
+    handle @music_health {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    handle {
+        respond "not found" 404
+    }
+}
