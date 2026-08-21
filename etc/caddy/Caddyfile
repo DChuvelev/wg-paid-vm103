@@ -1,5 +1,5 @@
 {
-    auto_https off
+    auto_https disable_redirects
     admin off
 }
 
@@ -18,11 +18,15 @@
     }
 
     handle @reports {
-        root * /srv/wg-paid/reports
-        file_server
+        redir https://reports.secret-studio.ru{uri} 308
     }
 
     handle {
         respond "not found" 404
     }
+}
+
+https://reports.secret-studio.ru {
+    root * /srv/wg-paid/reports
+    file_server
 }
