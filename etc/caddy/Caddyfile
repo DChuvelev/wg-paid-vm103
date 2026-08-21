@@ -8,19 +8,21 @@
         host musicserver.internal.invalid
         path /health /health/db
     }
-
     handle @music_health {
         reverse_proxy 10.71.100.83:18080
     }
-
     @reports {
-        host reports.secret-studio.ru
+        host reports.secret-studio.ru reports001.secret-studio.ru
     }
-
     handle @reports {
-        redir https://reports.secret-studio.ru{uri} 308
+        redir https://{host}{uri} 308
     }
-
+    @access {
+        host access.secret-studio.ru
+    }
+    handle @access {
+        redir https://access.secret-studio.ru{uri} 308
+    }
     handle {
         respond "not found" 404
     }
@@ -29,4 +31,19 @@
 https://reports.secret-studio.ru {
     root * /srv/wg-paid/reports
     file_server
+}
+
+https://reports001.secret-studio.ru {
+    root * /srv/wg-paid/reports
+    file_server
+}
+
+https://access.secret-studio.ru {
+    @health path /health
+    handle @health {
+        respond "access-ok" 200
+    }
+    handle {
+        respond 204
+    }
 }
