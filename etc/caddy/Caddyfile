@@ -13,6 +13,15 @@
         reverse_proxy 10.71.100.83:18080
     }
 
+    @reports {
+        host reports.secret-studio.ru
+    }
+
+    handle @reports {
+        root * /srv/wg-paid/reports
+        file_server
+    }
+
     handle {
         respond "not found" 404
     }
