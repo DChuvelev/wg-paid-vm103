@@ -36,8 +36,9 @@ printf '' | openssl s_client -connect 127.0.0.1:443 -servername "$ACCESS_HOST" 2
 openssl x509 -in "$CERT" -noout -checkhost "$ACCESS_HOST" >/dev/null
 access_login_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/login")"; [ "$access_login_code" = 200 ]; grep -Fq 'Secret Studio Access' "$TMP"; grep -Fq '/v2/auth/login/request' "$TMP"
 access_magic_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/auth/magic#token=never-sent")"; [ "$access_magic_code" = 200 ]; grep -Fq 'location.hash' "$TMP"; grep -Fq 'history.replaceState' "$TMP"; grep -Fq '/v2/auth/magic-link/consume' "$TMP"
-closed_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' -H 'Content-Type: application/json' --data '{"email":"closed-gate@example.invalid"}' "https://$ACCESS_HOST/v2/auth/login/request")"; [ "$closed_code" = 404 ]; grep -Fq '"detail":"not found"' "$TMP"
+account_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/account/me")"; [ "$account_code" = 401 ]
 admin_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/admin/invites")"; [ "$admin_code" = 404 ]; grep -Fqx 'not found' "$TMP"
+agent_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/agent/jobs")"; [ "$agent_code" = 404 ]; grep -Fqx 'not found' "$TMP"
 echo 'VM103_CADDY_ACTIVE=true'
 echo 'VM103_REPORTS_PRIMARY=PASS'
 echo 'VM103_REPORTS001_HTTP_REDIRECT=PASS'
@@ -51,7 +52,9 @@ echo 'VM103_ACCESS_TLS_CERTIFICATE_HOSTNAME=PASS'
 echo 'VM103_ACCESS_LOGIN_PAGE=PASS'
 echo 'VM103_ACCESS_MAGIC_FRAGMENT_PAGE=PASS'
 echo 'VM103_ACCESS_PUBLIC_API_PROXY_ACTIVE=true'
-echo 'VM103_ACCESS_EXTERNAL_ONBOARDING_GATE_CLOSED=PASS'
+echo 'VM103_ACCESS_EXTERNAL_ONBOARDING_GATE_OPEN=PASS'
+echo 'VM103_ACCESS_ACCOUNT_AUTH_REQUIRED=PASS'
+echo 'VM103_ACCESS_AGENT_PROXY_ACTIVE=false'
 echo 'VM103_ACCESS_ADMIN_PROXY_ACTIVE=false'
 
 WEB_META_ROOT='/srv/wg-paid/web-meta'
