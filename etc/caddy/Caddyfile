@@ -137,6 +137,13 @@ https://access.secret-studio.ru {
         file_server
     }
 
+    @invite path /invite /invite/
+    handle @invite {
+        root * /srv/wg-paid/access-web
+        rewrite * /login.html
+        file_server
+    }
+
     @magic path /auth/magic /auth/magic/
     handle @magic {
         root * /srv/wg-paid/access-web
