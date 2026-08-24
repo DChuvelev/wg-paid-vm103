@@ -127,7 +127,9 @@ https://access.secret-studio.ru {
 
     @root path /
     handle @root {
-        respond 204
+        root * /srv/wg-paid/access-web
+        rewrite * /login.html
+        file_server
     }
 
     @login path /login /login/
@@ -139,6 +141,13 @@ https://access.secret-studio.ru {
 
     @invite path /invite /invite/
     handle @invite {
+        root * /srv/wg-paid/access-web
+        rewrite * /login.html
+        file_server
+    }
+
+    @account path /account /account/
+    handle @account {
         root * /srv/wg-paid/access-web
         rewrite * /login.html
         file_server
