@@ -23,6 +23,28 @@
     handle @access {
         redir https://access.secret-studio.ru{uri} 308
     }
+
+    @admin_root_ca {
+        host admin.secret-studio.ru
+        remote_ip 10.250.100.0/24
+        path /caddy-local-root.crt
+    }
+    handle @admin_root_ca {
+        header Content-Type "application/x-x509-ca-cert"
+        header Cache-Control "no-store, max-age=0"
+        root * /srv/wg-paid/admin-runtime
+        rewrite * /caddy-local-root.crt
+        file_server
+    }
+
+    @admin_http {
+        host admin.secret-studio.ru
+        remote_ip 10.250.100.0/24
+    }
+    handle @admin_http {
+        redir https://admin.secret-studio.ru{uri} 308
+    }
+
     handle {
         respond "not found" 404
     }
@@ -162,6 +184,49 @@ https://access.secret-studio.ru {
 
     @public_api path /v2/auth/login/request /v2/auth/magic-link/consume /v2/auth/invites/redeem /v2/auth/logout /v2/account/me /v2/account/profiles /v2/account/profiles/*
     handle @public_api {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    handle {
+        respond "not found" 404
+    }
+}
+
+https://admin.secret-studio.ru {
+    tls internal
+
+    header {
+        Cache-Control "no-store, max-age=0"
+        Pragma "no-cache"
+        Referrer-Policy "no-referrer"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+    }
+
+    @trusted_health {
+        remote_ip 10.250.100.0/24
+        path /health
+    }
+    handle @trusted_health {
+        respond "admin-ok" 200
+    }
+
+    @trusted_root {
+        remote_ip 10.250.100.0/24
+        path /
+    }
+    handle @trusted_root {
+        root * /srv/wg-paid/admin-web
+        rewrite * /index.html
+        file_server
+    }
+
+    @trusted_admin_api {
+        remote_ip 10.250.100.0/24
+        path /v2/admin/*
+    }
+    handle @trusted_admin_api {
         reverse_proxy 10.71.100.83:18080
     }
 

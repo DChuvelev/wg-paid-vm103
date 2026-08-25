@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Secret Studio VPN — Admin</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:1040px;margin:42px auto;padding:0 20px;line-height:1.45}
+form{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:10px 0}
+label{display:flex;flex-direction:column;gap:6px;min-width:240px}
+input,select,button{font:inherit;padding:8px 11px}button{cursor:pointer}.hidden{display:none}.muted{opacity:.7}
+.card{border:1px solid #ccc;border-radius:9px;padding:14px;margin:14px 0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1 1 280px}
+table{border-collapse:collapse;width:100%;margin:10px 0}th,td{text-align:left;border-bottom:1px solid #ddd;padding:8px 6px;vertical-align:top}.status{min-height:1.4em}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all}.danger{font-weight:600}.small{font-size:.9em}
+</style>
+</head>
+<body>
+<main>
+<h1>Secret Studio VPN — Admin</h1>
+<section id="loginView">
+<p>Private management portal. Application authentication is required in addition to WireGuard access.</p>
+<form id="loginForm"><label>Admin secret <input id="adminToken" type="password" autocomplete="current-password" required minlength="32"></label><button type="submit">Sign in</button></form>
+<p id="loginStatus" class="status" role="status"></p>
+</section>
+
+<section id="adminView" class="hidden">
+<div class="row"><strong>Admin session active</strong><span class="grow"></span><button id="logout" type="button">Sign out</button></div>
+<p id="globalStatus" class="status" role="status"></p>
+
+<article class="card">
+<h2>Invites</h2>
+<form id="inviteForm">
+<label>Plan <select id="invitePlan" required></select></label>
+<label>Intended email (optional) <input id="inviteEmail" type="email" autocomplete="off"></label>
+<button type="submit">Create invite</button>
+</form>
+<div id="newInvite" class="hidden"><p><strong>New registration URL</strong></p><div class="row"><code id="inviteUrl" class="grow"></code><button id="copyInvite" type="button">Copy URL</button></div></div>
+<p id="inviteStatus" class="status" role="status"></p>
+<div id="inviteList"></div>
+</article>
+
+<article class="card">
+<h2>Users</h2>
+<form id="userSearch"><label>Email contains/exact <input id="userEmail" type="email" autocomplete="off"></label><button type="submit">Search</button><button id="allUsers" type="button">List users</button></form>
+<p id="userStatus" class="status" role="status"></p>
+<div id="userList"></div>
+</article>
+</section>
+</main>
+<script>
+const $=(id)=>document.getElementById(id);
+const loginView=$('loginView'),adminView=$('adminView'),loginStatus=$('loginStatus'),globalStatus=$('globalStatus');
+function cookieValue(name){const p=name+'=';for(const raw of document.cookie.split(';')){const v=raw.trim();if(v.startsWith(p))return decodeURIComponent(v.slice(p.length));}return '';}
+function adminCsrf(){const t=cookieValue('wg_admin_csrf');return t?{'x-admin-csrf-token':t}:{};}
+async function api(path,opts={}){const o={credentials:'same-origin',...opts};o.headers={...(opts.headers||{})};if(o.method&& !['GET','HEAD','OPTIONS'].includes(o.method.toUpperCase()))Object.assign(o.headers,adminCsrf());const r=await fetch(path,o);if(r.status===401){showLogin('Admin session expired.');throw new Error('unauthorized');}return r;}
+function showLogin(msg=''){adminView.classList.add('hidden');loginView.classList.remove('hidden');loginStatus.textContent=msg;}
+function showAdmin(){loginView.classList.add('hidden');adminView.classList.remove('hidden');loginStatus.textContent='';}
+async function checkSession(){try{const r=await fetch('/v2/admin/session',{credentials:'same-origin'});if(r.ok){showAdmin();await refreshAll();}else showLogin();}catch(_){showLogin('Unable to reach admin service.');}}
+$('loginForm').addEventListener('submit',async(e)=>{e.preventDefault();loginStatus.textContent='Signing in…';try{const r=await fetch('/v2/admin/session/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({token:$('adminToken').value})});$('adminToken').value='';if(r.ok){showAdmin();await refreshAll();}else if(r.status===401)loginStatus.textContent='Invalid admin secret.';else loginStatus.textContent='Unable to sign in.';}catch(_){loginStatus.textContent='Unable to sign in.';}});
+$('logout').addEventListener('click',async()=>{globalStatus.textContent='Signing out…';try{const r=await api('/v2/admin/session/logout',{method:'POST'});if(r.ok||r.status===204){showLogin('Signed out.');globalStatus.textContent='';}}catch(_){}});
+let plans=[];
+async function loadPlans(){const r=await api('/v2/admin/plans');if(!r.ok)throw new Error('plans');plans=await r.json();const s=$('invitePlan');s.textContent='';for(const p of plans){const o=document.createElement('option');o.value=p.id;o.textContent=p.display_name+' ('+p.code+')';s.appendChild(o);}}
+function fmt(v){return v?new Date(v).toLocaleString():'—';}
+async function loadInvites(){const el=$('inviteList');$('inviteStatus').textContent='Loading…';const r=await api('/v2/admin/invites');if(!r.ok){$('inviteStatus').textContent='Unable to load invites.';return;}const rows=await r.json();el.textContent='';const t=document.createElement('table');t.innerHTML='<thead><tr><th>State</th><th>Email</th><th>Plan</th><th>Expires</th><th></th></tr></thead>';const b=document.createElement('tbody');for(const x of rows){const tr=document.createElement('tr');const plan=plans.find(p=>p.id===x.plan_id);for(const text of [x.state,x.intended_email||'any',plan?plan.code:x.plan_id,fmt(x.expires_at)]){const td=document.createElement('td');td.textContent=text;tr.appendChild(td);}const a=document.createElement('td');if(x.state==='active'){const btn=document.createElement('button');btn.type='button';btn.textContent='Revoke';btn.addEventListener('click',()=>revokeInvite(x.invite_id));a.appendChild(btn);}tr.appendChild(a);b.appendChild(tr);}t.appendChild(b);el.appendChild(t);$('inviteStatus').textContent=rows.length?rows.length+' invite(s).':'No invites.';}
+$('inviteForm').addEventListener('submit',async(e)=>{e.preventDefault();$('inviteStatus').textContent='Creating…';const body={plan_id:$('invitePlan').value,intended_email:$('inviteEmail').value.trim()||null};const r=await api('/v2/admin/invites',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!r.ok){$('inviteStatus').textContent='Unable to create invite.';return;}const x=await r.json();const url='https://access.secret-studio.ru/invite#token='+encodeURIComponent(x.invite_token);$('inviteUrl').textContent=url;$('newInvite').classList.remove('hidden');$('inviteEmail').value='';$('inviteStatus').textContent='Invite created.';await loadInvites();});
+$('copyInvite').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('inviteUrl').textContent);$('inviteStatus').textContent='Registration URL copied.';}catch(_){$('inviteStatus').textContent='Copy failed; select the URL manually.';}});
+async function revokeInvite(id){$('inviteStatus').textContent='Revoking…';const r=await api('/v2/admin/invites/'+encodeURIComponent(id)+'/revoke',{method:'POST'});$('inviteStatus').textContent=r.ok?'Invite revoked.':'Unable to revoke invite.';if(r.ok)await loadInvites();}
+function protocolLimit(grant,protocol){return (grant.protocol_limits||[]).find(x=>x.protocol===protocol)||null;}
+function renderUsers(rows){const host=$('userList');host.textContent='';for(const u of rows){const card=document.createElement('article');card.className='card';const h=document.createElement('h3');h.textContent=u.email;card.appendChild(h);const meta=document.createElement('p');meta.className='small muted';meta.textContent='User '+u.user_id+' · verified '+fmt(u.email_verified_at);card.appendChild(meta);for(const g of (u.grants||[])){const box=document.createElement('div');box.className='card';const title=document.createElement('p');title.innerHTML='<strong>Grant</strong> ';title.append(document.createTextNode(g.status+' · '+g.id));box.appendChild(title);const w=protocolLimit(g,'wireguard');if(w){const row=document.createElement('div');row.className='row';const info=document.createElement('span');info.textContent='WireGuard profiles: '+w.profile_count+' / '+w.profile_limit+(w.can_create?' · can create':'');const input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.value=String(w.profile_limit);input.style.width='90px';const btn=document.createElement('button');btn.type='button';btn.textContent='Set limit';btn.addEventListener('click',()=>setLimit(g.id,input));row.append(info,input,btn);box.appendChild(row);}const profiles=(u.profiles||[]).filter(p=>p.protocol==='wireguard');const p=document.createElement('p');p.className='small';p.textContent=profiles.length?'Profiles: '+profiles.map(x=>(x.label||x.id)+' ['+x.status+(x.tunnel_ip?' · '+x.tunnel_ip:'')+']').join('; '):'Profiles: none';box.appendChild(p);card.appendChild(box);}host.appendChild(card);}}
+async function loadUsers(email=''){const q=email?'?email='+encodeURIComponent(email):'';$('userStatus').textContent='Loading…';const r=await api('/v2/admin/users'+q);if(!r.ok){$('userStatus').textContent='Unable to load users.';return;}const rows=await r.json();renderUsers(rows);$('userStatus').textContent=rows.length?rows.length+' user(s).':'No users found.';}
+async function setLimit(grantId,input){const n=Number(input.value);if(!Number.isInteger(n)||n<0){$('userStatus').textContent='Profile limit must be a non-negative integer.';return;}$('userStatus').textContent='Updating limit…';const r=await api('/v2/admin/grants/'+encodeURIComponent(grantId)+'/protocol-limits/wireguard',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile_limit:n})});$('userStatus').textContent=r.ok?'WireGuard profile limit updated.':'Unable to update profile limit.';if(r.ok)await loadUsers($('userEmail').value.trim());}
+$('userSearch').addEventListener('submit',async(e)=>{e.preventDefault();await loadUsers($('userEmail').value.trim());});
+$('allUsers').addEventListener('click',async()=>{$('userEmail').value='';await loadUsers('');});
+async function refreshAll(){globalStatus.textContent='Loading admin data…';try{await loadPlans();await Promise.all([loadInvites(),loadUsers('')]);globalStatus.textContent='';}catch(e){if(e.message!=='unauthorized')globalStatus.textContent='Unable to load admin data.';}}
+checkSession();
+</script>
+</body>
+</html>
