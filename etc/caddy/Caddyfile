@@ -24,19 +24,6 @@
         redir https://access.secret-studio.ru{uri} 308
     }
 
-    @admin_root_ca {
-        host admin.secret-studio.ru
-        remote_ip 10.250.100.0/24
-        path /caddy-local-root.crt
-    }
-    handle @admin_root_ca {
-        header Content-Type "application/x-x509-ca-cert"
-        header Cache-Control "no-store, max-age=0"
-        root * /srv/wg-paid/admin-runtime
-        rewrite * /caddy-local-root.crt
-        file_server
-    }
-
     @admin_http {
         host admin.secret-studio.ru
         remote_ip 10.250.100.0/24
@@ -193,7 +180,7 @@ https://access.secret-studio.ru {
 }
 
 https://admin.secret-studio.ru {
-    tls internal
+    tls /etc/caddy/admin-tls/admin.secret-studio.ru.crt /etc/caddy/admin-tls/admin.secret-studio.ru.key
 
     header {
         Cache-Control "no-store, max-age=0"

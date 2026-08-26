@@ -1,0 +1,8 @@
+[Unit]
+Description=Secret Studio admin certificate renewal via lego and RU-CENTER DNS-01
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/router-vm103-admin-cert-renew.sh
