@@ -126,7 +126,7 @@ https://access.secret-studio.ru {
         Referrer-Policy "no-referrer"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
-        Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
     }
 
     @health path /health
@@ -137,35 +137,41 @@ https://access.secret-studio.ru {
     @root path /
     handle @root {
         root * /srv/wg-paid/access-web
-        rewrite * /login.html
+        rewrite * /index.html
         file_server
     }
 
     @login path /login /login/
     handle @login {
         root * /srv/wg-paid/access-web
-        rewrite * /login.html
+        rewrite * /index.html
         file_server
     }
 
     @invite path /invite /invite/
     handle @invite {
         root * /srv/wg-paid/access-web
-        rewrite * /login.html
+        rewrite * /index.html
         file_server
     }
 
     @account path /account /account/
     handle @account {
         root * /srv/wg-paid/access-web
-        rewrite * /login.html
+        rewrite * /index.html
         file_server
     }
 
     @magic path /auth/magic /auth/magic/
     handle @magic {
         root * /srv/wg-paid/access-web
-        rewrite * /magic.html
+        rewrite * /index.html
+        file_server
+    }
+
+    @assets path /assets/*
+    handle @assets {
+        root * /srv/wg-paid/access-web
         file_server
     }
 
