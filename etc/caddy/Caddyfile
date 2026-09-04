@@ -194,7 +194,7 @@ https://admin.secret-studio.ru {
         Referrer-Policy "no-referrer"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
-        Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+        Content-Security-Policy "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
     }
 
     @trusted_health {
@@ -212,6 +212,15 @@ https://admin.secret-studio.ru {
     handle @trusted_root {
         root * /srv/wg-paid/admin-web
         rewrite * /index.html
+        file_server
+    }
+
+    @trusted_assets {
+        remote_ip 10.250.100.0/24
+        path /assets/*
+    }
+    handle @trusted_assets {
+        root * /srv/wg-paid/admin-web
         file_server
     }
 
