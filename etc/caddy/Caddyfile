@@ -126,7 +126,7 @@ https://access.secret-studio.ru {
         Referrer-Policy "no-referrer"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
-        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+        Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' blob:; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
     }
 
     @health path /health
