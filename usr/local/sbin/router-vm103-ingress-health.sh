@@ -7,12 +7,15 @@ ACCESS_HOST='access.secret-studio.ru'
 LOCAL_HTTP='http://127.0.0.1'
 REPORTS_ROOT='/srv/wg-paid/reports'
 TMP="$(mktemp /tmp/vm103-public-ingress-health.XXXXXX)"
+INDEX="$(mktemp /tmp/vm103-access-index.XXXXXX)"
+JS="$(mktemp /tmp/vm103-access-js.XXXXXX)"
 CERT="$(mktemp /tmp/vm103-public-ingress-cert.XXXXXX)"
-trap 'rm -f "$TMP" "$CERT"' EXIT INT TERM
+trap 'rm -f "$TMP" "$INDEX" "$JS" "$CERT"' EXIT INT TERM
 systemctl is-active --quiet caddy
 command -v caddy >/dev/null 2>&1
 command -v curl >/dev/null 2>&1
 command -v openssl >/dev/null 2>&1
+command -v sed >/dev/null 2>&1
 [ -d "$REPORTS_ROOT" ]
 [ -f "$REPORTS_ROOT/latest/index.html" ]
 ss -lnt 2>/dev/null | awk '{print $4}' | grep -Eq ':(80)$'
@@ -30,14 +33,19 @@ for H in "$REPORTS_HOST" "$REPORTS001_HOST"; do
  openssl x509 -in "$CERT" -noout -checkhost "$H" >/dev/null
 done
 access_redirect="$(curl -sS --max-time 5 -o /dev/null -w '%{http_code}' -H "Host: $ACCESS_HOST" "$LOCAL_HTTP/")"; [ "$access_redirect" = 308 ]
-access_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/")"; [ "$access_code" = 200 ]; grep -Fq '/v2/auth/login/request' "$TMP"; grep -Fq "location.replace('/account')" "$TMP"
+access_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$INDEX" -w '%{http_code}' "https://$ACCESS_HOST/")"; [ "$access_code" = 200 ]
+JS_PATH="$(sed -n 's/.*<script[^>]*src="\([^"]*\.js\)".*/\1/p' "$INDEX" | head -n 1)"
+[ -n "$JS_PATH" ]; case "$JS_PATH" in /assets/*.js) ;; *) echo "STOP_VM103_ACCESS_JS_PATH=$JS_PATH"; exit 24;; esac
+curl -fsS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" "https://$ACCESS_HOST$JS_PATH" -o "$JS"
+for marker in '/v2/auth/login/request' '/v2/auth/invites/inspect' '/v2/auth/invites/redeem' '/v2/auth/invites/resend' '/v2/auth/invites/change-email' '/v2/account/profiles' 'wg_access_csrf' '/v2/auth/magic-link/consume'; do grep -Fq "$marker" "$JS"; done
 access_health_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/health")"; [ "$access_health_code" = 200 ]; grep -Fqx 'access-ok' "$TMP"
 printf '' | openssl s_client -connect 127.0.0.1:443 -servername "$ACCESS_HOST" 2>/dev/null | openssl x509 -outform PEM > "$CERT"
 openssl x509 -in "$CERT" -noout -checkhost "$ACCESS_HOST" >/dev/null
-access_login_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/login")"; [ "$access_login_code" = 200 ]; grep -Fq 'Secret Studio VPN' "$TMP"; grep -Fq '/v2/auth/login/request' "$TMP"
-access_invite_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/invite#token=never-sent")"; [ "$access_invite_code" = 200 ]; grep -Fq "location.pathname==='/invite'" "$TMP"; grep -Fq '/v2/auth/invites/redeem' "$TMP"
-access_account_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/account")"; [ "$access_account_code" = 200 ]; grep -Fq "location.pathname==='/account'" "$TMP"; grep -Fq '/v2/account/profiles' "$TMP"; grep -Fq 'wg_access_csrf' "$TMP"
-access_magic_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/auth/magic#token=never-sent")"; [ "$access_magic_code" = 200 ]; grep -Fq 'location.hash' "$TMP"; grep -Fq 'history.replaceState' "$TMP"; grep -Fq '/v2/auth/magic-link/consume' "$TMP"; grep -Fq "location.replace('/account')" "$TMP"
+for page in /login /invite /account /auth/magic; do page_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST$page")"; [ "$page_code" = 200 ]; cmp -s "$TMP" "$INDEX"; done
+for invite_api_path in /v2/auth/invites/inspect /v2/auth/invites/resend /v2/auth/invites/change-email; do
+  invite_api_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' -H 'Content-Type: application/json' --data '{}' "https://$ACCESS_HOST$invite_api_path")"
+  [ "$invite_api_code" = 422 ]; grep -Fq '"detail"' "$TMP"
+done
 account_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/account/me")"; [ "$account_code" = 401 ]
 admin_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/admin/invites")"; [ "$admin_code" = 404 ]; grep -Fqx 'not found' "$TMP"
 agent_code="$(curl -sS --max-time 15 --resolve "$ACCESS_HOST:443:127.0.0.1" -o "$TMP" -w '%{http_code}' "https://$ACCESS_HOST/v2/agent/jobs")"; [ "$agent_code" = 404 ]; grep -Fqx 'not found' "$TMP"
@@ -51,37 +59,28 @@ echo 'VM103_ACCESS_HTTP_REDIRECT=PASS'
 echo 'VM103_ACCESS_ROOT_LOGIN_PAGE=PASS'
 echo 'VM103_ACCESS_HEALTH_ROUTE=PASS'
 echo 'VM103_ACCESS_TLS_CERTIFICATE_HOSTNAME=PASS'
+echo 'VM103_ACCESS_VITE_JS_DISCOVERY=PASS'
+echo 'VM103_ACCESS_FRONTEND_CONTRACT_MARKERS=PASS'
 echo 'VM103_ACCESS_LOGIN_PAGE=PASS'
 echo 'VM103_ACCESS_INVITE_PAGE=PASS'
 echo 'VM103_ACCESS_ACCOUNT_PAGE=PASS'
 echo 'VM103_ACCESS_MAGIC_FRAGMENT_PAGE=PASS'
 echo 'VM103_ACCESS_PUBLIC_API_PROXY_ACTIVE=true'
+echo 'VM103_ACCESS_INVITE_LIFECYCLE_API_ROUTES=PASS'
 echo 'VM103_ACCESS_EXTERNAL_ONBOARDING_GATE_OPEN=PASS'
 echo 'VM103_ACCESS_ACCOUNT_AUTH_REQUIRED=PASS'
 echo 'VM103_ACCESS_AGENT_PROXY_ACTIVE=false'
 echo 'VM103_ACCESS_ADMIN_PROXY_ACTIVE=false'
-
 WEB_META_ROOT='/srv/wg-paid/web-meta'
 OLD_SEED='/old/20260821-133634_step050m07p26c4f_r04_public_reports_cutover_vm101_dnat_to_vm103_and_tls_retry/'
-[ -f "$WEB_META_ROOT/index.html" ]
-[ -f "$WEB_META_ROOT/robots.txt" ]
-[ -f "$WEB_META_ROOT/sitemap-reports.xml" ]
-[ -f "$WEB_META_ROOT/sitemap-reports001.xml" ]
+[ -f "$WEB_META_ROOT/index.html" ]; [ -f "$WEB_META_ROOT/robots.txt" ]; [ -f "$WEB_META_ROOT/sitemap-reports.xml" ]; [ -f "$WEB_META_ROOT/sitemap-reports001.xml" ]
 for H in "$REPORTS_HOST" "$REPORTS001_HOST"; do
-  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/" -o "$TMP"
-  grep -Fq 'Secret Studio Reports' "$TMP"
-  grep -Fq 'href="/latest/"' "$TMP"
-  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/robots.txt" -o "$TMP"
-  grep -Fqx 'User-agent: OAI-SearchBot' "$TMP"
-  grep -Fqx 'Allow: /' "$TMP"
-  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/sitemap.xml" -o "$TMP"
-  grep -Fq "https://$H/latest/" "$TMP"
-  grep -Fq "https://$H$OLD_SEED" "$TMP"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/" -o "$TMP"; grep -Fq 'Secret Studio Reports' "$TMP"; grep -Fq 'href="/latest/"' "$TMP"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/robots.txt" -o "$TMP"; grep -Fqx 'User-agent: OAI-SearchBot' "$TMP"; grep -Fqx 'Allow: /' "$TMP"
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" "https://$H/sitemap.xml" -o "$TMP"; grep -Fq "https://$H/latest/" "$TMP"; grep -Fq "https://$H$OLD_SEED" "$TMP"
   HDR="$(mktemp /tmp/vm103-crawl-hdr.XXXXXX)"
-  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H/latest/"
-  tr -d '\r' < "$HDR" | grep -Fix 'Cache-Control: no-cache, max-age=0, must-revalidate' >/dev/null
-  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H$OLD_SEED"
-  tr -d '\r' < "$HDR" | grep -Fix 'Cache-Control: public, max-age=31536000, immutable' >/dev/null
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H/latest/"; tr -d '\r' < "$HDR" | grep -Fix 'Cache-Control: no-cache, max-age=0, must-revalidate' >/dev/null
+  curl -fsS --max-time 15 --resolve "$H:443:127.0.0.1" -D "$HDR" -o /dev/null "https://$H$OLD_SEED"; tr -d '\r' < "$HDR" | grep -Fix 'Cache-Control: public, max-age=31536000, immutable' >/dev/null
   rm -f "$HDR"
 done
 echo 'VM103_REPORTS_CRAWL_ROOT=PASS'
@@ -90,5 +89,4 @@ echo 'VM103_REPORTS_SITEMAP=PASS'
 echo 'VM103_REPORTS_LATEST_CACHE_POLICY=PASS'
 echo 'VM103_REPORTS_OLD_CACHE_POLICY=PASS'
 echo 'VM103_REPORTS_ACCESS_LOGGING_CONFIGURED=true'
-
 echo 'RESULT=PASS_VM103_ACCESS_AND_REPORTS001_INGRESS_HEALTH'
