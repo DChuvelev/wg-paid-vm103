@@ -26,7 +26,7 @@
 
     @admin_http {
         host admin.secret-studio.ru
-        remote_ip 10.250.100.0/24
+        remote_ip 10.250.100.0/24 10.250.101.0/24
     }
     handle @admin_http {
         redir https://admin.secret-studio.ru{uri} 308
@@ -198,7 +198,7 @@ https://admin.secret-studio.ru {
     }
 
     @trusted_health {
-        remote_ip 10.250.100.0/24
+        remote_ip 10.250.100.0/24 10.250.101.0/24
         path /health
     }
     handle @trusted_health {
@@ -206,7 +206,7 @@ https://admin.secret-studio.ru {
     }
 
     @trusted_root {
-        remote_ip 10.250.100.0/24
+        remote_ip 10.250.100.0/24 10.250.101.0/24
         path /
     }
     handle @trusted_root {
@@ -216,7 +216,7 @@ https://admin.secret-studio.ru {
     }
 
     @trusted_assets {
-        remote_ip 10.250.100.0/24
+        remote_ip 10.250.100.0/24 10.250.101.0/24
         path /assets/*
     }
     handle @trusted_assets {
@@ -225,7 +225,7 @@ https://admin.secret-studio.ru {
     }
 
     @trusted_admin_api {
-        remote_ip 10.250.100.0/24
+        remote_ip 10.250.100.0/24 10.250.101.0/24
         path /v2/admin/*
     }
     handle @trusted_admin_api {
