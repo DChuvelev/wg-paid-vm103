@@ -183,6 +183,22 @@ https://access.secret-studio.ru {
         reverse_proxy 10.71.100.83:18080
     }
 
+    @account_billing_collection {
+        method GET POST
+        path /v2/account/billing/payments
+    }
+    handle @account_billing_collection {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    @account_billing_payment {
+        method GET
+        path_regexp ^/v2/account/billing/payments/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+    }
+    handle @account_billing_payment {
+        reverse_proxy 10.71.100.83:18080
+    }
+
     @public_api path /v2/auth/login/request /v2/auth/magic-link/consume /v2/auth/invites/inspect /v2/auth/invites/redeem /v2/auth/invites/resend /v2/auth/invites/change-email /v2/auth/logout /v2/account/me /v2/account/profiles /v2/account/profiles/*
     handle @public_api {
         reverse_proxy 10.71.100.83:18080
