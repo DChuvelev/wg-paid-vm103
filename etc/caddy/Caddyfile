@@ -199,6 +199,30 @@ https://access.secret-studio.ru {
         reverse_proxy 10.71.100.83:18080
     }
 
+    @account_referrals_collection {
+        method GET POST
+        path /v2/account/referrals
+    }
+    handle @account_referrals_collection {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    @account_referrals_reissue {
+        method POST
+        path_regexp ^/v2/account/referrals/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/share-token/reissue$
+    }
+    handle @account_referrals_reissue {
+        reverse_proxy 10.71.100.83:18080
+    }
+
+    @account_referrals_revoke {
+        method POST
+        path_regexp ^/v2/account/referrals/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/revoke$
+    }
+    handle @account_referrals_revoke {
+        reverse_proxy 10.71.100.83:18080
+    }
+
     @public_api path /v2/auth/login/request /v2/auth/magic-link/consume /v2/auth/invites/inspect /v2/auth/invites/redeem /v2/auth/invites/resend /v2/auth/invites/change-email /v2/auth/logout /v2/account/me /v2/account/profiles /v2/account/profiles/*
     handle @public_api {
         reverse_proxy 10.71.100.83:18080
