@@ -231,6 +231,14 @@ https://access.secret-studio.ru {
         reverse_proxy 10.71.100.83:18080
     }
 
+    @bulk_invite_api {
+        method POST
+        path /v2/auth/bulk-invites/inspect /v2/auth/bulk-invites/redeem
+    }
+    handle @bulk_invite_api {
+        reverse_proxy 10.71.100.83:18080
+    }
+
     @public_api path /v2/auth/login/request /v2/auth/magic-link/consume /v2/auth/invites/inspect /v2/auth/invites/redeem /v2/auth/invites/resend /v2/auth/invites/change-email /v2/auth/logout /v2/account/me /v2/account/profiles /v2/account/profiles/*
     handle @public_api {
         reverse_proxy 10.71.100.83:18080
