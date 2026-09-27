@@ -199,6 +199,14 @@ https://access.secret-studio.ru {
         reverse_proxy 10.71.100.83:18080
     }
 
+    @account_billing_retirements {
+        method PUT
+        path /v2/account/billing/pending-retirements
+    }
+    handle @account_billing_retirements {
+        reverse_proxy 10.71.100.83:18080
+    }
+
     @account_referrals_collection {
         method GET POST
         path /v2/account/referrals
