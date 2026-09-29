@@ -175,6 +175,29 @@ https://access.secret-studio.ru {
         file_server
     }
 
+    @library_root {
+        remote_ip 10.253.0.0/16 10.254.0.0/16 10.250.100.0/24 10.250.101.0/24 10.71.100.84/32
+        path /library
+    }
+    handle @library_root {
+        redir /library/ 308
+    }
+
+    @library_allowed {
+        remote_ip 10.253.0.0/16 10.254.0.0/16 10.250.100.0/24 10.250.101.0/24 10.71.100.84/32
+        path /library/*
+    }
+    handle @library_allowed {
+        header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; script-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'"
+        uri strip_prefix /library
+        reverse_proxy 127.0.0.1:18081
+    }
+
+    @library_denied path /library /library/*
+    handle @library_denied {
+        respond "not found" 404
+    }
+
     @yookassa_webhook {
         method POST
         path /v2/billing/yookassa/webhook
