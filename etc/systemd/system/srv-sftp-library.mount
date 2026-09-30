@@ -1,0 +1,15 @@
+[Unit]
+Description=Secret Studio library SFTP bind mount
+After=local-fs.target
+Before=ssh.service
+ConditionPathIsDirectory=/srv/secret-studio-library
+ConditionPathIsDirectory=/srv/sftp/library
+
+[Mount]
+What=/srv/secret-studio-library
+Where=/srv/sftp/library
+Type=none
+Options=bind
+
+[Install]
+WantedBy=multi-user.target
