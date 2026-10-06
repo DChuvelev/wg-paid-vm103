@@ -1,15 +1,23 @@
-source_commit=798a5b69a42cb3a3d7c1b43515693e2b36f01afa
-source_tree=6d5a0d8d3044a0ed483b21c3eefc6c31bdd0ea65
+source_commit=ca250dd9ec8e3519cee42cd69789f7420054311b
+source_tree=7eb17e0d79d1971c4217561ae482ccd07d469abe
 repository=DChuvelev/wg-paid-web
 branch=p28g-frontend-configurations
-parent_commit=f5b6d0508b81571ba6feea546778d948ff0a37b3
-parent_tree=91952095b29d68bcf1260947d38cb8d222113684
-final_commit=798a5b69a42cb3a3d7c1b43515693e2b36f01afa
-final_tree=6d5a0d8d3044a0ed483b21c3eefc6c31bdd0ea65
-origin_branch_commit=798a5b69a42cb3a3d7c1b43515693e2b36f01afa
-changed_file_count=2
-aggregate_build_sha256=1a811e0c59cb278e16f31a3d41e593c02950d5e7f0c1661386af6acd0c77a75e
-Admin byte identity against accepted P33B: PASS (3 files)
+node=24.20.0
+npm=11.19.0
+aggregate_build_sha256=6a62937920400988ce69441e314579d72ca4237859dbf93cc54bf6731b2e330d
+aggregate_algorithm=SHA256(UTF8-no-BOM, sorted sha256<two spaces>relative_path<two spaces>size<LF> asset records; MANIFEST excluded)
+archive_source_date_epoch=1791273004
+archive_format=USTAR
+archive_uid=0
+archive_gid=0
+archive_directory_mode=0755
+archive_file_mode=0644
+gzip_mtime=0
+accepted_access_source_commit=798a5b69a42cb3a3d7c1b43515693e2b36f01afa
+accepted_access_byte_identity=PASS (9 files)
+clean_build_reproducibility=PASS (two clean installs/builds)
+
+files:
 access-web/assets/HelpCard-D4cOlISC.js size=56799 sha256=63f09fa5eea98f2edeb8fb754cefacc37daa590cdf55b9056ecba04f729a8f27
 access-web/assets/PublicOfferPage-CeBb8kvC.css size=254 sha256=f1dbb9e00a0bd77e016e8484f97b6327c18d49fc240dae7db928d456695ebb4e
 access-web/assets/PublicOfferPage-Hu-l7b7V.js size=841 sha256=c50295f8f2a2c86f0fb7098cf5942405495d7284416b34ceea0c645e2ef39555
@@ -19,6 +27,6 @@ access-web/assets/index-CT_FJ-6-.js size=442487 sha256=087bf008c0ddd1b00ddacee6e
 access-web/assets/index-DAXXEyaM.css size=17841 sha256=e69618376efd45277fa5cade432f7ef8a028ce1a38171260542af60c3e49badf
 access-web/assets/publicOffer-C-76JciU.js size=15136 sha256=d4da93bea3460785bd41a2f42d4d1489c5bbc734e5b7a252e4469a00b718e103
 access-web/index.html size=374 sha256=95400e62bde78b1f989eb565c5cc298dbeaf64d68c330acdd6e1028c8d3a39c4
-admin-web/assets/index-BsqdWDNz.css size=33935 sha256=49d9615244ee40dbb282e9454623b3df79f2f24be3affb6cdd1e235856336af6
-admin-web/assets/index-lk-kxNf_.js size=365889 sha256=1257035d7899f44da352c8ea5fae19e4cb7b04f36aa2bfe934c5da23bdeefc82
-admin-web/index.html size=463 sha256=3b759844e95d92f98880f236101a2a4fadf575708559c0ac2be950a625590fbc
+admin-web/assets/index-B-VsOzgR.js size=372199 sha256=de73f029cd3f74e1765c6c6ff6d5d1bfbaecb7fbf6e9e38e227ff1ea76851de2
+admin-web/assets/index-WoK1-WV1.css size=35397 sha256=c24d3b51833745ecdde8029b0cbe9db7e5d7bc4bb813aaa82b8cf864e1068208
+admin-web/index.html size=463 sha256=9338f9b945a5bff151105c19451f08b728be456e9df720102fad1db736be4048
