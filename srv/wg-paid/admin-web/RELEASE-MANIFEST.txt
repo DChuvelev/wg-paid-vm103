@@ -1,13 +1,13 @@
-source_commit=6cdd03bf97a206388cd1d109bdf58dc664d63240
-source_tree=89094ce12c1cf88ccfbc8c5958b6a3850cce8f85
-parent_commit=720daa69c1e2bee07cb7fd191f03d1646ca9a277
+source_commit=e8a89d0e5b791ea0fef886bc6780887dbb591089
+source_tree=485f0a8866d51bb126edbb24cf7138b6ca9f3a3b
+parent_commit=6cdd03bf97a206388cd1d109bdf58dc664d63240
 repository=DChuvelev/wg-paid-web
 branch=p28g-frontend-configurations
 node=24.20.0
 npm=11.19.0
-aggregate_build_sha256=77434acbfbcac3f038a21d4dc12ff807b822712f4079774a7dd49f3632e0540d
+aggregate_build_sha256=e15286a17bdf9b2777894ae31544b2f90d1335c84e93984a8fde0677a15d6913
 aggregate_algorithm=SHA256(sorted UTF-8/LF sha256  relative_path  size asset records; MANIFEST excluded)
-archive_source_date_epoch=1791394271
+archive_source_date_epoch=1791444734
 archive_format=USTAR
 archive_uid=0
 archive_gid=0
@@ -15,12 +15,13 @@ archive_directory_mode=0755
 archive_file_mode=0644
 gzip_mtime=0
 clean_build_reproducibility=PASS (12/12 outputs)
-accepted_access_artifact=WG_PAID_WEB_P34C_720daa6_WEB_DIST.tar.gz
+accepted_access_artifact=WG_PAID_WEB_P34D_6cdd03b_WEB_DIST.tar.gz
 accepted_access_byte_identity=PASS (9/9 files)
 full_test_result=PASS (461/461 tests; 27/27 files)
 typecheck=PASS
 lint=PASS
 build=PASS
+compiled_admin_sanity=PASS
 browser_visual_acceptance=POST_DEPLOY
 
 files:
@@ -33,6 +34,6 @@ access-web/assets/index-CT_FJ-6-.js size=442487 sha256=087bf008c0ddd1b00ddacee6e
 access-web/assets/index-DAXXEyaM.css size=17841 sha256=e69618376efd45277fa5cade432f7ef8a028ce1a38171260542af60c3e49badf
 access-web/assets/publicOffer-C-76JciU.js size=15136 sha256=d4da93bea3460785bd41a2f42d4d1489c5bbc734e5b7a252e4469a00b718e103
 access-web/index.html size=374 sha256=95400e62bde78b1f989eb565c5cc298dbeaf64d68c330acdd6e1028c8d3a39c4
-admin-web/assets/index-4KnLOKK9.css size=36885 sha256=64248655b46e57a92c58faa47953f10639c5d3a213b0a92499607276bc695265
-admin-web/assets/index-Cdk0DnI9.js size=374033 sha256=96751801c7a5b5497c76e98bdd177a0bb491008f548ca48324e60f199041de6a
-admin-web/index.html size=463 sha256=5684ef6c253e98a98494907c152287a6b9fc772153a65b930c92aa5af057de5a
+admin-web/assets/index-DAY2zuxS.css size=39915 sha256=4db058c0a54e76a1e7a70c64e35817648e6c5dabfc365b63a006ddf80e6545ba
+admin-web/assets/index-DQd53ONt.js size=374635 sha256=5e3ade7f7da1d0d801174ec7ea0f3fd059d00d5de27a01a83b29fe7a9c4c88c8
+admin-web/index.html size=463 sha256=8a62af0c71c35fdeea9c271145404c363b5a01e14198ed292b4897088e4229ef
