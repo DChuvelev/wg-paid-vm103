@@ -1,39 +1,53 @@
-source_commit=e8a89d0e5b791ea0fef886bc6780887dbb591089
-source_tree=485f0a8866d51bb126edbb24cf7138b6ca9f3a3b
-parent_commit=6cdd03bf97a206388cd1d109bdf58dc664d63240
+source_commit=a135c3b5b5c8ce16e0c239efdb515298e40cb733
+source_tree=0e7b63dbbee8464c827171b322ce1c97064123a8
+parent_commit=e8a89d0e5b791ea0fef886bc6780887dbb591089
 repository=DChuvelev/wg-paid-web
 branch=p28g-frontend-configurations
 node=24.20.0
 npm=11.19.0
-aggregate_build_sha256=e15286a17bdf9b2777894ae31544b2f90d1335c84e93984a8fde0677a15d6913
+package_lock_sha256=21aa99ab972438c4e9021a24294c2dedfa1d26f39047ebc54cd5d5ccf882b427
+openapi_raw_sha256=e93337317b4dc7e1a81d547759e513ea0c9754a426f16625d4bdfaf96f2a10df
+openapi_canonical_sha256=b6ce1bcbcaf2eaaa1669eee5d6e90f30ed8d9aaf427dc75be9b09970efa04718
+openapi_version=3.1.0
+openapi_paths=72
+openapi_operations=81
+openapi_schemas=92
+aggregate_build_sha256=22b5417470718b979876df0b0a31f3449da8416ed978bb368bb528e822119023
 aggregate_algorithm=SHA256(sorted UTF-8/LF sha256  relative_path  size asset records; MANIFEST excluded)
-archive_source_date_epoch=1791444734
+archive_source_date_epoch=1791471213
 archive_format=USTAR
 archive_uid=0
 archive_gid=0
 archive_directory_mode=0755
 archive_file_mode=0644
 gzip_mtime=0
+source_export=verified tracked accepted-commit checkout (canonical checkout bytes preserved)
+checkout_input_inventory_sha256=a669df84a5486cb29486fbcc4f22356c61f5ab5d872553fe166b29026e2ebfcb
+npm_ci=PASS (two independent clean installs)
 clean_build_reproducibility=PASS (12/12 outputs)
-accepted_access_artifact=WG_PAID_WEB_P34D_6cdd03b_WEB_DIST.tar.gz
-accepted_access_byte_identity=PASS (9/9 files)
-full_test_result=PASS (461/461 tests; 27/27 files)
+accepted_admin_artifact=WG_PAID_WEB_P34E_e8a89d0_WEB_DIST.tar.gz
+accepted_admin_byte_identity=PASS (3/3 files)
+full_test_result=PASS (475/475 tests; 28/28 files)
 typecheck=PASS
 lint=PASS
 build=PASS
-compiled_admin_sanity=PASS
+pinned_openapi_verification=PASS
+source_bytes_unchanged=PASS
+source_maps_absent=PASS
+compiled_support_endpoint=PASS
+public_admin_agent_route_exclusion=PASS
 browser_visual_acceptance=POST_DEPLOY
 
 files:
-access-web/assets/HelpCard-D4cOlISC.js size=56799 sha256=63f09fa5eea98f2edeb8fb754cefacc37daa590cdf55b9056ecba04f729a8f27
+access-web/assets/HelpCard-aOQ9q-p7.js size=56799 sha256=54aac29e0d005bcc139a8a4743a7b1bfe99f8e76eeecc979283d51a31201c663
 access-web/assets/PublicOfferPage-CeBb8kvC.css size=254 sha256=f1dbb9e00a0bd77e016e8484f97b6327c18d49fc240dae7db928d456695ebb4e
-access-web/assets/PublicOfferPage-Hu-l7b7V.js size=841 sha256=c50295f8f2a2c86f0fb7098cf5942405495d7284416b34ceea0c645e2ef39555
-access-web/assets/ReviewAccountPage-DhpRaIbR.js size=9391 sha256=5a1b176a3d360e7fc67d64881f9abf256b245fa2196478da621b09788bee0908
+access-web/assets/PublicOfferPage-DL-b5Vrr.js size=841 sha256=a0ee765adba14bd32e44f4dc4246038059c30e44f0eaa196150ae46c80b7436c
 access-web/assets/ReviewAccountPage-Dr7ihcCU.css size=1571 sha256=4bfa1d706e47cf69f22d852aa611023657f57185e897ac7fc1f086d077d80861
-access-web/assets/index-CT_FJ-6-.js size=442487 sha256=087bf008c0ddd1b00ddacee6e7bbe191852c94faf609614ef6533476b36d903a
-access-web/assets/index-DAXXEyaM.css size=17841 sha256=e69618376efd45277fa5cade432f7ef8a028ce1a38171260542af60c3e49badf
-access-web/assets/publicOffer-C-76JciU.js size=15136 sha256=d4da93bea3460785bd41a2f42d4d1489c5bbc734e5b7a252e4469a00b718e103
-access-web/index.html size=374 sha256=95400e62bde78b1f989eb565c5cc298dbeaf64d68c330acdd6e1028c8d3a39c4
+access-web/assets/ReviewAccountPage-m2h6V8Yd.js size=9391 sha256=c29f8874ffd35851d2d09d61d9764c2c47699c3246661f09b10ce6dd114d3bb2
+access-web/assets/index-BzdFX_SK.css size=17973 sha256=45ca2d3634456fb1e043d0ba577a127871c57897f4cb792ef17315900db6378a
+access-web/assets/index-CaEF2D8A.js size=445352 sha256=c0abec8eba736df640596a5d4b31b0197d89e06ad2d40fcbf0251d47ea56022e
+access-web/assets/publicOffer-Crv3kL2F.js size=15136 sha256=57b3fd4954034c32d804784c27a7482d73afc2c05d2948c379d1b014d732b641
+access-web/index.html size=374 sha256=52241601d505623558417732876fc274d2f77fcf0d3cb30ec77e98f70504f2cf
 admin-web/assets/index-DAY2zuxS.css size=39915 sha256=4db058c0a54e76a1e7a70c64e35817648e6c5dabfc365b63a006ddf80e6545ba
 admin-web/assets/index-DQd53ONt.js size=374635 sha256=5e3ade7f7da1d0d801174ec7ea0f3fd059d00d5de27a01a83b29fe7a9c4c88c8
 admin-web/index.html size=463 sha256=8a62af0c71c35fdeea9c271145404c363b5a01e14198ed292b4897088e4229ef
